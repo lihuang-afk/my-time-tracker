@@ -1,5 +1,5 @@
-{
-  "name": "Ê±¹â¿ÌÂ¼»ú",
+ï»¿{
+  "name": "æ—¶å…‰åˆ»å½•æœº",
   "short_name": "TimeLog",
   "start_url": "./index.html",
   "display": "standalone",

@@ -1,11 +1,11 @@
-const CACHE_NAME = 'time-tracker-v1';
+ï»¿const CACHE_NAME = 'time-tracker-v1';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json'
 ];
 
-// °²×° Service Worker
+// å®‰è£… Service Worker
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -14,7 +14,7 @@ self.addEventListener('install', (e) => {
   );
 });
 
-// À¹½ØÇëÇó£¬ÓÅÏÈÊ¹ÓÃ»º´æ
+// æ‹¦æˆªè¯·æ±‚ï¼Œä¼˜å…ˆä½¿ç”¨ç¼“å­˜
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((response) => {
