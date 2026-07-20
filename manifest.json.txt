@@ -1,0 +1,20 @@
+{
+  "name": "Ê±¹â¿ÌÂ¼»ú",
+  "short_name": "TimeLog",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a1b26",
+  "theme_color": "#1a1b26",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/7aa2f7/ffffff?text=Time",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512/7aa2f7/ffffff?text=Time",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

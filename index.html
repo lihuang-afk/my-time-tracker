@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>时光刻录机</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1b26">
+    <style>
+        :root {
+            --bg-color: #1a1b26;
+            --card-bg: #24283b;
+            --text-primary: #c0caf5;
+            --accent-color: #7aa2f7;
+            --border-radius: 16px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* 顶部时钟区域 */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .clock {
+            font-size: 3.5rem;
+            font-weight: 200;
+            letter-spacing: 2px;
+            color: #fff;
+        }
+        .date {
+            font-size: 1rem;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        /* 快捷按钮区域 */
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(122, 162, 247, 0.3);
+            color: var(--accent-color);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn:active, .btn.active-filter {
+            background-color: var(--accent-color);
+            color: #fff;
+            transform: scale(0.98);
+        }
+
+        /* 自定义输入框 */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        input[type="text"] {
+            flex: 1;
+            background: var(--card-bg);
+            border: none;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            color: white;
+            outline: none;
+        }
+        .add-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+        }
+
+        /* 列表区域 */
+        .list-container {
+            flex: 1;
+            overflow-y: auto;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+        }
+        .record-item {
+            background: var(--card-bg);
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .record-time {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        .record-event {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .empty-tip {
+            text-align: center;
+            opacity: 0.5;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="clock" id="clock">00:00:00</div>
+        <div class="date" id="date">加载中...</div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="addRecord('用餐')">??? 用餐</button>
+        <button class="btn" onclick="addRecord('工作')">?? 工作</button>
+        <button class="btn" onclick="addRecord('休息')">? 休息</button>
+        <button class="btn" onclick="addRecord('运动')">?? 运动</button>
+    </div>
+
+    <div class="input-group">
+        <input type="text" id="customInput" placeholder="输入其他事件..." onkeypress="handleEnter(event)">
+        <button class="add-btn" onclick="addCustomRecord()">添加</button>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3 style="margin:0">时间轴</h3>
+        <button class="btn" style="padding: 5px 15px; font-size: 0.8rem;" onclick="toggleFilter()">筛选模式: <span id="filterStatus">全部</span></button>
+    </div>
+
+    <div class="list-container" id="recordList">
+        <!-- 记录将显示在这里 -->
+    </div>
+
+    <script>
+        // --- 1. 时钟逻辑 ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', { hour12: false });
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('date').innerText = now.toLocaleDateString('zh-CN', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- 2. 数据管理逻辑 ---
+        let records = JSON.parse(localStorage.getItem('timeRecords')) || [];
+        let currentFilter = null; // null 表示显示全部
+
+        function saveRecords() {
+            localStorage.setItem('timeRecords', JSON.stringify(records));
+            renderList();
+        }
+
+        function addRecord(eventName) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+            
+            const newRecord = {
+                id: Date.now(),
+                event: eventName,
+                time: timeString,
+                timestamp: now.getTime() // 用于排序
+            };
+
+            records.unshift(newRecord); // 加到最前面
+            saveRecords();
+        }
+
+        function addCustomRecord() {
+            const input = document.getElementById('customInput');
+            const val = input.value.trim();
+            if (val) {
+                addRecord(val);
+                input.value = '';
+            }
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') addCustomRecord();
+        }
+
+        // --- 3. 渲染与筛选逻辑 ---
+        function toggleFilter() {
+            // 简单的循环切换筛选：全部 -> 用餐 -> 工作 -> ... -> 全部
+            // 这里为了演示简单，我们只做一个“查看最近一次点击的类型”的逻辑，
+            // 或者你可以修改为点击具体的按钮来筛选。
+            // 现在的逻辑是：点击上面的大按钮不仅记录，还会自动筛选出那个类别
+            
+            // 这里我们增加一个重置按钮逻辑
+            if(currentFilter) {
+                currentFilter = null;
+                document.getElementById('filterStatus').innerText = "全部";
+            } else {
+                // 默认先看用餐，你可以改逻辑
+                currentFilter = "用餐"; 
+                document.getElementById('filterStatus').innerText = "用餐";
+            }
+            renderList();
+        }
+
+        // 专门供按钮调用的筛选函数
+        function filterByType(type) {
+            currentFilter = type;
+            document.getElementById('filterStatus').innerText = type;
+            renderList();
+        }
+
+        // 修改上面的按钮点击事件，使其既记录又筛选（可选，或者只记录不筛选）
+        // 这里我改为：点击按钮只记录。如果要筛选，请使用列表上方的“筛选模式”按钮，
+        // 或者我们可以把上面的按钮改成纯筛选？
+        // 需求说：“点击用餐就能筛选”。
+        // 让我们改变一下逻辑：上面的按钮如果是“记录”，那我们就再加一行小按钮做筛选？
+        // 不，为了界面简洁，我们这样做：
+        // 点击大按钮 -> 记录当前时间 + 事件。
+        // 同时，我们在列表上方加一个专门的筛选栏。
+        
+        // 重新实现需求中的“点击用餐筛选”：
+        // 我们把上面的按钮做成双重功能太复杂。
+        // 我在列表里加一个标签云来做筛选吧，或者保留原来的逻辑：
+        // 这里的逻辑是：点击“用餐”按钮，会记录一条“用餐”，并且立刻切换到只看“用餐”的视图。
+        const originalAddRecord = addRecord;
+        addRecord = function(eventName) {
+            originalAddRecord(eventName);
+            // 自动切换到该事件的筛选视图
+            currentFilter = eventName;
+            document.getElementById('filterStatus').innerText = eventName;
+            renderList();
+        }
+
+
+        function renderList() {
+            const listEl = document.getElementById('recordList');
+            listEl.innerHTML = '';
+
+            let displayData = records;
+            if (currentFilter) {
+                displayData = records.filter(r => r.event === currentFilter);
+            }
+
+            if (displayData.length === 0) {
+                listEl.innerHTML = '<div class="empty-tip">暂无记录</div>';
+                return;
+            }
+
+            displayData.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'record-item';
+                div.innerHTML = `
+                    <div>
+                        <div class="record-event">${item.event}</div>
+                        <div style="font-size:0.8rem; opacity:0.6; margin-top:4px;">${new Date(item.timestamp).toLocaleDateString()}</div>
+                    </div>
+                    <div class="record-time">${item.time}</div>
+                `;
+                listEl.appendChild(div);
+            });
+        }
+
+        // 初始化渲染
+        renderList();
+
+        // --- 4. PWA Service Worker 注册 ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW failed', err));
+            });
+        }
+    </script>
+</body>
+</html>
