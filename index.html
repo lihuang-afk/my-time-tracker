@@ -497,7 +497,7 @@
     <div class="input-hint" id="inputHint">最多输入 4 个汉字，超出需点击记录后编辑</div>
     <div class="quick-tags" id="quickTags">
       <span class="tag" data-filter="胰岛素" onclick="handleTagClick(this, '胰岛素')">💉 胰岛素</span>
-      <span class="tag" data-filter="用餐" onclick="handleTagClick(this, '用餐')">☕ 用餐</span>
+      <span class="tag" data-filter="用餐" onclick="handleTagClick(this, '用餐')">🍽 用餐</span>
       <span class="tag" data-filter="运动" onclick="handleTagClick(this, '运动')">🏃 运动</span>
       <span class="tag" data-filter="血糖" onclick="handleTagClick(this, '血糖')">💊 血糖</span>
       <span class="tag" data-filter="手指血" onclick="handleTagClick(this, '手指血')">🔵 手指血</span>
@@ -565,25 +565,34 @@
       '会议': ['会议', '开会', '讨论', '汇报', '评审', '例会'],
       '用餐': ['用餐', '吃饭', '早餐', '午餐', '晚餐', '早饭', '午饭', '晚饭', '食堂', '外卖', '点餐', '吃', '喝', '咖啡', '奶茶'],
       '运动': ['运动', '跑步', '健身', '锻炼', '游泳', '瑜伽', '打球', '散步', '走路'],
-      '学习': ['学习', '阅读', '看书', '听课', '培训', '考证', '复习', '备考', '刷题']
+      '学习': ['学习', '阅读', '看书', '听课', '培训', '考证', '复习', '备考', '刷题'],
+      '胰岛素': ['胰岛素'],
+      '血糖': ['血糖'],
+      '手指血': ['手指血']
     };
 
     const TAG_ICONS = {
       '工作': '💼',
       '休息': '☕',
       '会议': '🗣',
-      '用餐': '☕',
+      '用餐': '🍽',
       '运动': '🏃',
-      '学习': '📖'
+      '学习': '📖',
+      '胰岛素': '💉',
+      '血糖': '💊',
+      '手指血': '🔵'
     };
 
     const TAG_LABELS = {
       '工作': '💼 工作',
       '休息': '☕ 休息',
       '会议': '🗣 会议',
-      '用餐': '☕ 用餐',
+      '用餐': '🍽 用餐',
       '运动': '🏃 运动',
-      '学习': '📖 学习'
+      '学习': '📖 学习',
+      '胰岛素': '💉 胰岛素',
+      '血糖': '💊 血糖',
+      '手指血': '🔵 手指血'
     };
 
     function pad(n) { return n < 10 ? '0' + n : n; }
