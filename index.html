@@ -1,12 +1,13 @@
 ﻿<!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>时光刻录机</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1a1b26">
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>时光刻录机</title>
+<link href="manifest.json" rel="manifest"/>
+<meta content="#1a1b26" name="theme-color"/>
+<style>
         :root {
             --bg-color: #1a1b26;
             --card-bg: #24283b;
@@ -133,34 +134,28 @@
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <div class="clock" id="clock">00:00:00</div>
-        <div class="date" id="date">加载中...</div>
-    </div>
-
-    <div class="controls">
-        <button class="btn" onclick="addRecord('用餐')">??? 用餐</button>
-        <button class="btn" onclick="addRecord('工作')">?? 工作</button>
-        <button class="btn" onclick="addRecord('休息')">? 休息</button>
-        <button class="btn" onclick="addRecord('运动')">?? 运动</button>
-    </div>
-
-    <div class="input-group">
-        <input type="text" id="customInput" placeholder="输入其他事件..." onkeypress="handleEnter(event)">
-        <button class="add-btn" onclick="addCustomRecord()">添加</button>
-    </div>
-
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h3 style="margin:0">时间轴</h3>
-        <button class="btn" style="padding: 5px 15px; font-size: 0.8rem;" onclick="toggleFilter()">筛选模式: <span id="filterStatus">全部</span></button>
-    </div>
-
-    <div class="list-container" id="recordList">
-        <!-- 记录将显示在这里 -->
-    </div>
-
-    <script>
+<div class="header">
+<div class="clock" id="clock">00:00:00</div>
+<div class="date" id="date">加载中...</div>
+</div>
+<div class="controls">
+<button class="btn" onclick="addRecord('用餐')">??? 用餐</button>
+<button class="btn" onclick="addRecord('工作')">?? 工作</button>
+<button class="btn" onclick="addRecord('休息')">? 休息</button>
+<button class="btn" onclick="addRecord('运动')">?? 运动</button>
+</div>
+<div class="input-group">
+<input id="customInput" onkeypress="handleEnter(event)" placeholder="输入其他事件..." type="text"/>
+<button class="add-btn" onclick="addCustomRecord()">添加</button>
+</div>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+<h3 style="margin:0">时间轴</h3>
+<button class="btn" onclick="toggleFilter()" style="padding: 5px 15px; font-size: 0.8rem;">筛选模式: <span id="filterStatus">全部</span></button>
+</div>
+<div class="list-container" id="recordList">
+<!-- 记录将显示在这里 -->
+</div>
+<script>
         // --- 1. 时钟逻辑 ---
         function updateClock() {
             const now = new Date();
