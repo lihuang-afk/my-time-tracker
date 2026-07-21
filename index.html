@@ -283,25 +283,64 @@
     }
     .card-actions button:hover { color: var(--text); }
     .card-actions .del:hover { color: var(--danger); }
-    .fab-clear {
+    .fab-menu {
       position: fixed;
       bottom: 20px;
       right: 20px;
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--muted);
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 20px rgba(56,189,248,0.3);
       transition: all 0.2s;
       z-index: 20;
     }
-    .fab-clear:active { transform: scale(0.9); background: rgba(239,68,68,0.1); color: var(--danger); border-color: var(--danger); }
+    .fab-menu:active { transform: scale(0.9); }
+    .fab-menu-panel {
+      position: fixed;
+      bottom: 78px;
+      right: 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      z-index: 20;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 160px;
+      animation: menuPop 0.2s ease;
+    }
+    .fab-menu-panel.show { display: flex; }
+    @keyframes menuPop {
+      from { opacity: 0; transform: translateY(10px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .fab-menu-item {
+      background: none;
+      border: none;
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s;
+      text-align: left;
+    }
+    .fab-menu-item:hover { background: rgba(56,189,248,0.1); }
+    .fab-menu-item.danger { color: var(--danger); }
+    .fab-menu-item.danger:hover { background: rgba(239,68,68,0.1); }
+    .fab-menu-item svg { flex-shrink: 0; }
     .toast {
       position: fixed;
       top: 16px;
@@ -410,15 +449,33 @@
       align-items: center;
       gap: 4px;
       animation: tagPop 0.3s ease;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .recorded-tag:active { transform: scale(0.95); }
+    .recorded-tag.active {
+      background: linear-gradient(135deg, rgba(34,197,94,0.3), rgba(34,197,94,0.15));
+      border-color: var(--success);
+      box-shadow: 0 0 12px rgba(34,197,94,0.25);
+      color: #fff;
+    }
+    .recorded-tag.active .tag-count {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+    }
+    .recorded-tag .tag-count {
+      font-size: 10px;
+      opacity: 0.8;
+      margin-left: 2px;
+      background: rgba(34,197,94,0.2);
+      padding: 1px 5px;
+      border-radius: 8px;
+      transition: all 0.2s;
     }
     @keyframes tagPop {
       0% { opacity: 0; transform: scale(0.8); }
       100% { opacity: 1; transform: scale(1); }
-    }
-    .recorded-tag .tag-time {
-      font-size: 10px;
-      opacity: 0.7;
-      margin-left: 2px;
     }
   </style>
 </head>
@@ -444,7 +501,7 @@
       <span class="tag" data-filter="运动" onclick="handleTagClick(this, '运动')">🏃 运动</span>
       <span class="tag" data-filter="血糖" onclick="handleTagClick(this, '血糖')">💊 血糖</span>
       <span class="tag" data-filter="手指血" onclick="handleTagClick(this, '手指血')">🔵 手指血</span>
-       </div>
+    </div>
     <div class="tag-hint">💡 单击标签 <span>立即记录</span>，长按标签 <span>筛选查看</span></div>
     <div class="recorded-tags" id="recordedTags"></div>
   </div>
@@ -461,9 +518,25 @@
     </div>
   </div>
 
-  <button class="fab-clear" onclick="clearAll()" title="清空全部记录">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+  <button class="fab-menu" id="fabMenu" onclick="toggleMenu()" title="数据管理">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
   </button>
+
+  <div class="fab-menu-panel" id="fabMenuPanel">
+    <button class="fab-menu-item" onclick="exportData()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      导出记录
+    </button>
+    <button class="fab-menu-item" onclick="importData()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+      导入记录
+    </button>
+    <button class="fab-menu-item danger" onclick="clearAll()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+      清空记录
+    </button>
+  </div>
+  <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImportFile(this)">
 
   <div class="toast" id="toast"></div>
 
@@ -499,7 +572,7 @@
       '工作': '💼',
       '休息': '☕',
       '会议': '🗣',
-      '用餐': '🍽',
+      '用餐': '☕',
       '运动': '🏃',
       '学习': '📖'
     };
@@ -508,7 +581,7 @@
       '工作': '💼 工作',
       '休息': '☕ 休息',
       '会议': '🗣 会议',
-      '用餐': '🍽 用餐',
+      '用餐': '☕ 用餐',
       '运动': '🏃 运动',
       '学习': '📖 学习'
     };
@@ -621,21 +694,27 @@
 
     function renderRecordedTags() {
       const container = document.getElementById('recordedTags');
-      const todayEvents = events.filter(e => {
-        const d = new Date(e.timestamp);
-        const n = new Date();
-        return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
-      }).slice(0, 10);
 
-      if (todayEvents.length === 0) {
+      // 统计所有记录中的标签出现次数
+      const tagCounts = {};
+      events.forEach(ev => {
+        const key = ev.content;
+        tagCounts[key] = (tagCounts[key] || 0) + 1;
+      });
+
+      if (Object.keys(tagCounts).length === 0) {
         container.innerHTML = '';
         return;
       }
 
       let html = '';
-      todayEvents.forEach(ev => {
-        html += `<span class="recorded-tag">${escapeHtml(ev.content)}<span class="tag-time">${formatTime(ev.timestamp)}</span></span>`;
+      Object.keys(tagCounts).forEach(tagContent => {
+        const count = tagCounts[tagContent];
+        const isActive = currentFilter === tagContent;
+        const activeClass = isActive ? 'active' : '';
+        html += `<span class="recorded-tag ${activeClass}" onclick="handleRecordedTagClick('${escapeHtml(tagContent).replace(/'/g, "\\'")}')">${escapeHtml(tagContent)}<span class="tag-count">${count}</span></span>`;
       });
+
       container.innerHTML = html;
     }
 
@@ -647,16 +726,28 @@
       setTimeout(() => el.classList.remove('recording'), 500);
     }
 
+    function handleRecordedTagClick(tagContent) {
+      if (currentFilter === tagContent) {
+        currentFilter = null;
+      } else {
+        currentFilter = tagContent;
+      }
+      renderRecordedTags();
+      render();
+    }
+
     function handleTagLongPress(filterKey) {
       isLongPress = true;
+      const label = TAG_LABELS[filterKey] || filterKey;
       const isActive = document.querySelector(`[data-filter="${filterKey}"]`).classList.contains('active');
       document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.recorded-tag').forEach(t => t.classList.remove('active'));
       if (isActive) {
         currentFilter = null;
         render();
       } else {
         document.querySelector(`[data-filter="${filterKey}"]`).classList.add('active');
-        currentFilter = filterKey;
+        currentFilter = label;
         render();
       }
       setTimeout(() => { isLongPress = false; }, 300);
@@ -706,14 +797,21 @@
     function clearFilter() {
       currentFilter = null;
       document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.recorded-tag').forEach(t => t.classList.remove('active'));
       render();
     }
 
     function deleteEvent(id) {
       if (!confirm('确定删除这条记录吗？')) return;
+      const ev = events.find(e => e.id === id);
+      const wasFiltered = ev && currentFilter === ev.content;
       events = events.filter(e => e.id !== id);
       saveEvents();
       render();
+      if (wasFiltered && !events.find(e => e.content === currentFilter)) {
+        currentFilter = null;
+        document.querySelectorAll('.recorded-tag').forEach(t => t.classList.remove('active'));
+      }
       renderRecordedTags();
       showToast('已删除');
     }
@@ -753,6 +851,7 @@
       saveEvents();
       currentFilter = null;
       document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.recorded-tag').forEach(t => t.classList.remove('active'));
       render();
       renderRecordedTags();
       showToast('已清空全部记录');
@@ -767,7 +866,7 @@
       let displayEvents = events.slice();
 
       if (currentFilter) {
-        displayEvents = displayEvents.filter(e => matchesFilter(e.content, currentFilter));
+        displayEvents = displayEvents.filter(e => e.content === currentFilter);
         filterBar.style.display = 'flex';
         filterName.textContent = currentFilter;
         filterCount.textContent = displayEvents.length;
@@ -845,6 +944,83 @@
     });
     document.getElementById('editOverlay').addEventListener('click', function(e) {
       if (e.target === this) closeEdit();
+    });
+
+    let menuOpen = false;
+
+    function toggleMenu() {
+      menuOpen = !menuOpen;
+      document.getElementById('fabMenuPanel').classList.toggle('show', menuOpen);
+    }
+
+    function closeMenu() {
+      menuOpen = false;
+      document.getElementById('fabMenuPanel').classList.remove('show');
+    }
+
+    function exportData() {
+      closeMenu();
+      const data = {
+        exportTime: new Date().toISOString(),
+        events: events
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '时光刻录机_' + formatDate(Date.now()) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('✓ 记录已导出');
+    }
+
+    function importData() {
+      closeMenu();
+      document.getElementById('importFile').click();
+    }
+
+    function handleImportFile(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.events && Array.isArray(data.events)) {
+            if (events.length > 0) {
+              if (!confirm('导入将覆盖现有 ' + events.length + ' 条记录，确定继续？')) {
+                input.value = '';
+                return;
+              }
+            }
+            events = data.events;
+            saveEvents();
+            currentFilter = null;
+            document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.recorded-tag').forEach(t => t.classList.remove('active'));
+            render();
+            renderRecordedTags();
+            showToast('✓ 成功导入 ' + events.length + ' 条记录');
+          } else {
+            showToast('✗ 文件格式不正确');
+          }
+        } catch (err) {
+          showToast('✗ 无法解析文件');
+        }
+        input.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    // 点击页面其他地方关闭菜单
+    document.addEventListener('click', function(e) {
+      const menu = document.getElementById('fabMenuPanel');
+      const btn = document.getElementById('fabMenu');
+      if (menuOpen && !menu.contains(e.target) && !btn.contains(e.target)) {
+        closeMenu();
+      }
     });
 
     render();
