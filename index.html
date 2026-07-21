@@ -498,7 +498,7 @@
     <div class="quick-tags" id="quickTags">
       <span class="tag" data-filter="胰岛素" onclick="handleTagClick(this, '胰岛素')">💉 胰岛素</span>
       <span class="tag" data-filter="用餐" onclick="handleTagClick(this, '用餐')">☕ 用餐</span>
-      <span class="tag" data-filter="运动" onclick="handleTagClick(this, '运动')">🚴 运动</span>
+      <span class="tag" data-filter="运动" onclick="handleTagClick(this, '运动')">🏃 运动</span>
       <span class="tag" data-filter="血糖" onclick="handleTagClick(this, '血糖')">💊 血糖</span>
       <span class="tag" data-filter="手指血" onclick="handleTagClick(this, '手指血')">🔵 手指血</span>
     </div>
@@ -570,13 +570,11 @@
 
     const TAG_ICONS = {
       '工作': '💼',
-      '休息': '',
+      '休息': '☕',
       '会议': '🗣',
-      '用餐': '',
+      '用餐': '☕',
       '运动': '🏃',
-      '胰岛素': '💉'
-	  '血糖': '💊'
-	  '手指血': '🔵'
+      '学习': '📖'
     };
 
     const TAG_LABELS = {
@@ -586,9 +584,6 @@
       '用餐': '☕ 用餐',
       '运动': '🏃 运动',
       '学习': '📖 学习'
-	  '胰岛素': '💉 胰岛素'
-	  '血糖': '💊 血糖'
-	  '手指血': '🔵 手指血'
     };
 
     function pad(n) { return n < 10 ? '0' + n : n; }
@@ -641,6 +636,21 @@
     }
 
     function getEventIcon(content) {
+      // 检测内容是否以 emoji 开头（通过检查第一个字符的 Unicode 范围）
+      if (content.length > 0) {
+        const first = content.charCodeAt(0);
+        const second = content.length > 1 ? content.charCodeAt(1) : 0;
+        // emoji 范围检测
+        const isEmoji = (first >= 0x1F300 && first <= 0x1F9FF) ||
+                        (first >= 0x2600 && first <= 0x26FF) ||
+                        (first >= 0x2700 && first <= 0x27BF) ||
+                        (first === 0xD83C && second >= 0xDF00) ||
+                        (first === 0xD83D && second >= 0xDC00) ||
+                        (first === 0xD83E && second >= 0xDD00);
+        if (isEmoji) {
+          return '';
+        }
+      }
       for (let key in TAG_KEYWORDS) {
         if (matchesFilter(content, key)) {
           return TAG_ICONS[key];
@@ -700,7 +710,6 @@
     function renderRecordedTags() {
       const container = document.getElementById('recordedTags');
 
-      // 统计所有记录中的标签出现次数
       const tagCounts = {};
       events.forEach(ev => {
         const key = ev.content;
@@ -905,7 +914,7 @@
               ${!isLast ? '<div class="time-line"></div>' : '<div style="width:2px;flex:1;opacity:0"></div>'}
             </div>
             <div class="card">
-              <div class="card-event"><span class="event-icon">${icon}</span>${escapeHtml(ev.content)}</div>
+              <div class="card-event">${icon ? '<span class="event-icon">' + icon + '</span>' : ''}${escapeHtml(ev.content)}</div>
               ${detailHtml}
               <div class="card-meta">
                 <div class="card-time">${formatFullTime(ev.timestamp)}</div>
@@ -1019,7 +1028,6 @@
       reader.readAsText(file);
     }
 
-    // 点击页面其他地方关闭菜单
     document.addEventListener('click', function(e) {
       const menu = document.getElementById('fabMenuPanel');
       const btn = document.getElementById('fabMenu');
